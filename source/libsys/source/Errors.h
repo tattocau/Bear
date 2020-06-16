@@ -22,17 +22,23 @@
 #include <cstring>
 #include <string>
 
-#include <fmt/format.h>
+//#include <fmt/format.h>
 
 namespace sys {
 
     inline std::string error_string(const int error) noexcept
     {
+#if defined(__GLIBC__) && defined(_GNU_SOURCE)
         char buffer[256];
-        if (char* result = strerror_r(error, buffer, 256); result != nullptr) {
-            return std::string(result);
-        } else {
-            return fmt::format("{0}", error);
-        }
+        char* result = strerror_r(error, buffer, 255);
+        return std::string(result);
+#else
+        char buffer[256];
+        strerror_r(error, buffer, 255);
+        return std::string(buffer);
+#endif
+//#else
+//        return fmt::format("{0}", error);
+//#endif
     }
 }
